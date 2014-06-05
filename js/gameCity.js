@@ -11,7 +11,6 @@ BasicGame.gameCity = function (game) {
     this.firingTimer3 = 0
     this.specialAttackTimer = 0
     this.waveTimer = 0
-    this.relocate = true;
     this.invincibility = false;
 };
 
@@ -39,7 +38,7 @@ BasicGame.gameCity.prototype = {
       this.layer.resizeWorld();
 
       //Creacion de jugador
-      this.player = this.add.sprite(0, 0, 'player');
+      this.player = this.add.sprite(20, 600, 'player');
       this.player.anchor.setTo(0.5, 0.5);
 
       //Creacion de Enemigos
@@ -138,13 +137,6 @@ BasicGame.gameCity.prototype = {
     },
 
     update: function () {
-      //Al pasar de un mapa a otro el punto (0,0) cambia de posicion por lo que hay que recolocar al personaje
-      if (this.relocate === true){
-        this.player.x = -4000
-        this.player.y = 500
-        this.relocate = false
-      }
-
     //Colisiones
       this.game.physics.arcade.collide(this.rats, this.layer);
       this.game.physics.arcade.collide(this.boars, this.layer);
@@ -419,7 +411,8 @@ BasicGame.gameCity.prototype = {
     //Siguiente nivel
       if (this.player.x >= 3750){
         BasicGame.healthBoss = 3
-        this.game.state.start('gameBoss2');
+        BasicGame.nextMap = 'gameBoss2'
+        this.game.state.start('nextMap');
       }
 
 

@@ -2,11 +2,12 @@
 <html>
 <head>
 	<meta charset="UTF-8" />
-	<title>Phaser Basic Project Template</title>
+	<title>Orphan Revenge</title>
 	<script src="js/phaser.min.js"></script>
 	<script src="js/boot.js"></script>
 	<script src="js/preloader.js"></script>
 	<script src="js/menu.js"></script>
+	<script src="js/nextMap.js"></script>
 	<script src="js/options.js"></script>
 	<script src="js/gameBoss1.js"></script>
 	<script src="js/gameBoss2.js"></script>
@@ -28,6 +29,7 @@ window.onload = function() {
 	game.state.add('boot', BasicGame.boot);
 	game.state.add('preloader', BasicGame.preloader);
 	game.state.add('menu', BasicGame.menu);
+	game.state.add('nextMap', BasicGame.nextMap);
 	game.state.add('options', BasicGame.options);
 	game.state.add('gameBoss1', BasicGame.gameBoss1);
 	game.state.add('gameBoss2', BasicGame.gameBoss2);

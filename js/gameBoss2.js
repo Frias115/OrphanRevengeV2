@@ -143,15 +143,6 @@ BasicGame.gameBoss2.prototype = {
   },
 
   update: function () {
-    //Al pasar de un mapa a otro el punto (0,0) cambia de posicion por lo que hay que recolocar al personaje y al jefe
-    if (this.relocate === true){
-        this.player.x = -4000
-        this.player.y = 0
-        this.boss.x = -4000
-        this.boss.y = 0
-        this.relocate = false
-      }
-
     //Colisiones
       this.game.physics.arcade.collide(this.rats, this.layer);
       this.game.physics.arcade.collide(this.boars, this.layer);

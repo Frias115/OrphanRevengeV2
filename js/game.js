@@ -405,7 +405,8 @@ BasicGame.game.prototype = {
       
     //Siguiente nivel
       if (this.player.x >= 3750){
-        this.game.state.start('gameBoss1');
+        BasicGame.nextMap = 'gameBoss1'
+        this.game.state.start('nextMap');
       }
 
 

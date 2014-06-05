@@ -4,7 +4,8 @@ var BasicGame = {
     healthBoss: 3,
     playerVel: 200,
     musicPlaying: false,
-    gameMusic: 0
+    gameMusic: 0,
+    nextMap: 'game'
 };
 
 BasicGame.boot = function (game) {

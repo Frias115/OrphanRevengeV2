@@ -11,7 +11,6 @@ BasicGame.gameBoss1 = function (game) {
     this.firingTimer3 = 0
     this.specialAttackTimer = 0
     this.waveTimer = 0
-    this.relocate = true;
     this.invincibility = false;
 };
 
@@ -66,7 +65,7 @@ BasicGame.gameBoss1.prototype = {
       this.spiders.setAll('body.collideWorldBounds', true);
 
       //Creacion Jefe
-      this.boss = this.add.sprite(-4000,500,'enemy');
+      this.boss = this.add.sprite(1400,500,'enemy');
       this.boss.anchor.setTo(0.5, 0.5);
 
      //Proyectiles del jefe
@@ -142,15 +141,6 @@ BasicGame.gameBoss1.prototype = {
   },
 
   update: function () {
-    //Al pasar de un mapa a otro el punto (0,0) cambia de posicion por lo que hay que recolocar al personaje y al jefe
-    if (this.relocate === true){
-        this.player.x = -4000
-        this.player.y = 0
-        this.boss.x = -4000
-        this.boss.y = 0
-        this.relocate = false
-      }
-
     //Colisiones
       this.game.physics.arcade.collide(this.rats, this.layer);
       this.game.physics.arcade.collide(this.boars, this.layer);
@@ -437,7 +427,8 @@ BasicGame.gameBoss1.prototype = {
 
     //Muerte del jefe, siguiente nivel
       if (BasicGame.healthBoss === 0){
-        this.game.state.start('gameCity');
+        BasicGame.nextMap = 'gameCity'
+        this.game.state.start('nextMap');
       }
 
     //Proyectiles y "ondas" que te lanza el jefe
@@ -446,7 +437,7 @@ BasicGame.gameBoss1.prototype = {
     if (this.bossBullet && this.firingTimer1 < this.game.time.now)
     {
         
-        this.bossBullet.reset((Math.random() * 1300) + 150, 0);
+        this.bossBullet.reset((Math.random() * 1250) + 150, 0);
 
         this.bossBullet.body.velocity.y = 500;
         this.firingTimer1 = this.game.time.now + 50;
@@ -456,7 +447,7 @@ BasicGame.gameBoss1.prototype = {
 
     if (this.bossWave)
     {
-        this.bossWave.reset((Math.random() * 1300) + 150, 800);
+        this.bossWave.reset((Math.random() * 1250) + 150, 800);
     }
 
 
