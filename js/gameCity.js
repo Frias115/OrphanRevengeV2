@@ -1,12 +1,18 @@
 
 BasicGame.gameCity = function (game) {
-  	this.player = null;
-  	this.enemy = null;
-  	this.rats = null;
-  	this.boars = null;
-  	this.timer = 0
-  	this.t = 0
+    this.player = null;
+    this.enemy = null;
+    this.rats = null;
+    this.boars = null;
+    this.timer = 0
+    this.t = 0
+    this.firingTimer1 = 0
+    this.firingTimer2 = 0
+    this.firingTimer3 = 0
+    this.specialAttackTimer = 0
+    this.waveTimer = 0
     this.relocate = true;
+    this.invincibility = false;
 };
 
 BasicGame.gameCity.prototype = {
@@ -34,6 +40,8 @@ BasicGame.gameCity.prototype = {
       this.layer.resizeWorld();
 
       //Musica de fondo
+      this.music = this.add.audio('bgMusic')
+      this.music.play('',0,0.2,true)
 
       //Creacion de jugador
       this.player = this.add.sprite(0, 0, 'player');//100,500
@@ -78,9 +86,10 @@ BasicGame.gameCity.prototype = {
 
       //Creacion de la "caja" del arma, ataque principal
       this.weapon = this.add.sprite(this.player.x+35,this.player.y-20,'')
+      this.specialAttack = this.add.sprite(this.player.x+35,this.player.y+20,'')
       
       //Activa las fisicas en objetos
-      this.game.physics.enable([this.rats,this.boars,this.crowns,this.player,this.weapon], Phaser.Physics.ARCADE);
+      this.game.physics.enable([this.rats,this.boars,this.crowns,this.player,this.weapon,this.specialAttack,this.boss,this.bossBullets,this.bossWaves], Phaser.Physics.ARCADE);
 
       //Caracteristicas enemigos
       this.rats.setAll('body.gravity.y', 300);
@@ -116,8 +125,15 @@ BasicGame.gameCity.prototype = {
       this.weapon.body.drag.setTo(600, 0);
       this.weapon.body.setSize(50,90,0,0)
 
+      this.specialAttack.body.collideWorldBounds = true;
+      this.specialAttack.body.drag.setTo(600, 0);
+      this.specialAttack.body.setSize(100,45,0,0)
+
       this.healthTxt = this.add.bitmapText(20, 20, 'minecraftia', 'Health: ' );
       this.healthTxt.fixedToCamera = true
+
+      this.specialAttackTxt = this.add.bitmapText(20, 60, 'minecraftia', '', 10);
+      this.specialAttackTxt.fixedToCamera = true
 
       //Variables salto
       this.canDoubleJump = true
@@ -173,22 +189,27 @@ BasicGame.gameCity.prototype = {
 
       this.healthTxt.setText ('Health: ' + BasicGame.health)
 
-      if(BasicGame.health === 0)
+      if(BasicGame.health <= 0)
       {
+       this.music.pause();
        this.game.state.start('menu');
       }
 
       //Movimiento arma
       this.weapon.y = this.player.y - 40
+      this.specialAttack.y = this.player.y - 20
 
       //Movimiento personaje
-      if (this.input.keyboard.isDown(Phaser.Keyboard.A))
+       if (this.input.keyboard.isDown(Phaser.Keyboard.A))
       {
-        this.player.body.setSize(93,145,0,0)
+        this.player.body.setSize(103,145,0,0)
         this.player.body.velocity.x = -BasicGame.playerVel
         this.weapon.body.velocity.x = -BasicGame.playerVel
+        this.specialAttack.body.velocity.x = -BasicGame.playerVel
         this.weapon.x = this.player.x - 85
         this.weapon.y = this.player.y - 40
+        this.specialAttack.x = this.player.x - 150
+        this.specialAttack.y = this.player.y - 20
         if (this.facing !== 'left')
         {
             this.player.animations.play('left');
@@ -199,11 +220,14 @@ BasicGame.gameCity.prototype = {
       }
       else if (this.input.keyboard.isDown(Phaser.Keyboard.D))
       {
-        this.player.body.setSize(93,145,0,0)
+        this.player.body.setSize(103,145,0,0)
         this.player.body.velocity.x = BasicGame.playerVel
         this.weapon.body.velocity.x = BasicGame.playerVel
+        this.specialAttack.body.velocity.x = BasicGame.playerVel
         this.weapon.x = this.player.x + 35
         this.weapon.y = this.player.y - 40
+        this.specialAttack.x = this.player.x + 55
+        this.specialAttack.y = this.player.y - 20
         if (this.facing !== 'right')
         {
             this.player.animations.play('right');
@@ -367,6 +391,11 @@ BasicGame.gameCity.prototype = {
       // Don't allow variable jump height after the jump button is released
       if (!this.input.keyboard.isDown(Phaser.Keyboard.W)) {
         this.canVariableJump = false;
+      }
+
+      if (this.player.x >= 3750){
+        BasicGame.healthBoss = 3
+        this.game.state.start('gameBoss2');
       }
 
 

@@ -2,7 +2,8 @@ var BasicGame = {
     //Ejemplo variables globales
     //money: 1000, life: 100, objects: 2
     //uso BasicGame.money en otro estado BasicGame.+(variable global)
-    health: 3,
+    health: 5,
+    healthBoss: 3,
     playerVel: 200
 };
 

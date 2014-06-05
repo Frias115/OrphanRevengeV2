@@ -28,6 +28,9 @@ BasicGame.preloader.prototype = {
 		this.load.spritesheet('player', 'assets/player.png', 168, 145); //133,145
 	    this.load.spritesheet('crown', 'assets/crown.png', 124, 145);
 	    this.load.image('enemy','assets/enemy.png')
+	    this.load.image('bullet','assets/bullet.jpg')
+	    this.load.image('bulletHunter','assets/bulletHunter.jpg')
+	    this.load.image('wave','assets/wave.jpg')
 		this.load.image('menuBg','assets/menuBg.png')
 		this.load.image('startButton','assets/startButton.png')
 		this.load.image('optionsButton','assets/optionsButton.png')
@@ -35,6 +38,7 @@ BasicGame.preloader.prototype = {
 		this.load.tilemap('map1', 'assets/Map3.json', null, Phaser.Tilemap.TILED_JSON)
 		this.load.tilemap('map2', 'assets/Map4.json', null, Phaser.Tilemap.TILED_JSON)
 		this.load.tilemap('mapBoss1', 'assets/MapBoss1.json', null, Phaser.Tilemap.TILED_JSON)
+		this.load.tilemap('mapBoss2', 'assets/MapBoss2.json', null, Phaser.Tilemap.TILED_JSON)
 		this.load.image('ground','assets/ground.png')
 		this.load.image('platform','assets/platform.png')
 		this.load.image('groundCity','assets/groundCity.png')

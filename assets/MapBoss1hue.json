@@ -20,7 +20,7 @@
  "tilesets":[
         {
          "firstgid":1,
-         "image":"..\/..\/..\/..\/..\/..\/Apache\/htdocs\/assets\/groundCity.png",
+         "image":"groundCity.png",
          "imageheight":165,
          "imagewidth":1922,
          "margin":0,

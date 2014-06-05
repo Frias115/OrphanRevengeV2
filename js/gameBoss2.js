@@ -1,11 +1,11 @@
 
-BasicGame.game = function (game) {
-    this.player = null;
-    this.enemy = null;
-    this.rats = null;
-    this.boars = null;
-    this.timer = 0
-    this.t = 0
+BasicGame.gameBoss2 = function (game) {
+  	this.player = null;
+  	this.enemy = null;
+  	this.rats = null;
+  	this.boars = null;
+  	this.timer = 0
+  	this.t = 0
     this.firingTimer1 = 0
     this.firingTimer2 = 0
     this.firingTimer3 = 0
@@ -15,10 +15,10 @@ BasicGame.game = function (game) {
     this.invincibility = false;
 };
 
-BasicGame.game.prototype = {
+BasicGame.gameBoss2.prototype = {
 
-	create: function () {
-		var x = this.game.width / 2
+  create: function () {
+      var x = this.game.width / 2
       , y = this.game.height / 2;
 
       
@@ -30,18 +30,16 @@ BasicGame.game.prototype = {
       this.bg = this.game.add.tileSprite(0, 0, 1024, 768, 'background');
       this.bg.fixedToCamera = true;
       
-
       //Carga de mapa
-      this.map = this.game.add.tilemap('map1');
-      this.map.addTilesetImage('ground');
-      this.map.addTilesetImage('platform');
+      this.map = this.game.add.tilemap('mapBoss2');
+      this.map.addTilesetImage('groundCity');
       this.map.setCollisionByExclusion([0]);
       this.layer = this.map.createLayer('Tile Layer 1');
       this.layer.resizeWorld();
 
       //Musica de fondo
-      this.music = this.add.audio('bgMusic')
-      this.music.play('',0,0.2,true)
+      //this.music = this.add.audio('bgMusic')
+      //this.music.play('',0,0.2,true)
 
       //Creacion de jugador
       this.player = this.add.sprite(100, 500, 'player');//100,500
@@ -53,15 +51,11 @@ BasicGame.game.prototype = {
       this.rats.physicsBodyType = Phaser.Physics.ARCADE;
       this.rats.setAll('body.collideWorldBounds', true);
 
-      console.log('check1')
 
       this.boars = this.add.group();
       this.boars.enableBody = true;
       this.boars.physicsBodyType = Phaser.Physics.ARCADE;
       this.boars.setAll('body.collideWorldBounds', true);
-
-        this.boar=this.boars.create(3650,1100, 'enemy');
-        this.boar.anchor.setTo(0.5,0.5);
 
 
       this.crowns = this.add.group();
@@ -69,27 +63,38 @@ BasicGame.game.prototype = {
       this.crowns.physicsBodyType = Phaser.Physics.ARCADE;
       this.crowns.setAll('body.collideWorldBounds', true);
 
-        this.crown=this.crowns.create(2000,400, 'crown');
-        this.crown.anchor.setTo(0.5,0.5);
-        this.crown1=this.crowns.create(500,1100, 'crown');
-        this.crown1.anchor.setTo(0.5,0.5);
-
 
       this.spiders = this.add.group();
       this.spiders.enableBody = true;
       this.spiders.physicsBodyType = Phaser.Physics.ARCADE;
       this.spiders.setAll('body.collideWorldBounds', true);
 
+      //Creacion Jefe
+      this.boss = this.add.sprite(700,700,'enemy');
+      this.boss.anchor.setTo(0.5, 0.5);
+
+
+     this.bossBullets = this.game.add.group();
+     this.bossBullets.createMultiple(3, 'bullet');
+     this.bossBullets.setAll('anchor.x', 0.5);
+     this.bossBullets.setAll('anchor.y', 1);
+     this.bossBullets.setAll('outOfBoundsKill', true);
+     this.bossBullets.setAll('checkWorldBounds', true);
+
+     this.bossWaves = this.game.add.group();
+     this.bossWaves.createMultiple(3, 'wave');
+     this.bossWaves.setAll('anchor.x', 0.5);
+     this.bossWaves.setAll('anchor.y', 1);
+     this.bossWaves.setAll('outOfBoundsKill', true);
+     this.bossWaves.setAll('checkWorldBounds', true);
 
 
       //Creacion de la "caja" del arma, ataque principal
       this.weapon = this.add.sprite(this.player.x+35,this.player.y-20,'')
       this.specialAttack = this.add.sprite(this.player.x+35,this.player.y+20,'')
-
-      console.log('check2')
       
       //Activa las fisicas en objetos
-      this.game.physics.enable([this.rats,this.boars,this.crowns,this.player,this.weapon,this.specialAttack], Phaser.Physics.ARCADE);
+      this.game.physics.enable([this.rats,this.boars,this.crowns,this.player,this.weapon,this.specialAttack,this.boss,this.bossBullets,this.bossWaves], Phaser.Physics.ARCADE);
 
       //Caracteristicas enemigos
       this.rats.setAll('body.gravity.y', 300);
@@ -100,15 +105,21 @@ BasicGame.game.prototype = {
 
       this.crowns.setAll('body.velocity.x', -150)
 
-      this.crown.animations.add('flyL', [8,7,6,5,4,3,2,1,0], 8, true)
-      this.crown.animations.add('flyR', [9,10,11,12,13,14,15,16,17], 8, true)
-      this.crown1.animations.add('flyL', [8,7,6,5,4,3,2,1,0], 8, true)
-      this.crown1.animations.add('flyR', [9,10,11,12,13,14,15,16,17], 8, true)
+      this.bossWaves.setAll('body.gravity.y', 300);
+
+
+      this.boss.body.gravity.y = 300;
+      this.boss.body.velocity.x = -150;
+      this.boss.body.collideWorldBounds = true;
 
       //Caracteristicas personaje
       this.player.body.gravity.y = 300;
       this.player.body.drag.setTo(600, 0);
       this.player.body.collideWorldBounds = true;
+
+      this.specialAttack.body.collideWorldBounds = true;
+      this.specialAttack.body.drag.setTo(600, 0);
+      this.specialAttack.body.setSize(100,45,0,0)
 
       this.player.animations.add('right', [1,2,3,4,5], 8, true)
       this.player.animations.add('left', [6,7,8,9,10], 8, true)
@@ -124,13 +135,12 @@ BasicGame.game.prototype = {
       this.weapon.body.drag.setTo(600, 0);
       this.weapon.body.setSize(50,90,0,0)
 
-      this.specialAttack.body.collideWorldBounds = true;
-      this.specialAttack.body.drag.setTo(600, 0);
-      this.specialAttack.body.setSize(100,45,0,0)
 
-
-      this.healthTxt = this.add.bitmapText(20, 20, 'minecraftia', 'Health: ' );
+      this.healthTxt = this.add.bitmapText(20, 20, 'minecraftia', '' );
       this.healthTxt.fixedToCamera = true
+
+      this.healthBossTxt = this.add.bitmapText(700, 20, 'minecraftia', '' );
+      this.healthBossTxt.fixedToCamera = true
 
       this.specialAttackTxt = this.add.bitmapText(20, 60, 'minecraftia', '', 10);
       this.specialAttackTxt.fixedToCamera = true
@@ -142,21 +152,28 @@ BasicGame.game.prototype = {
       //Centrado de la camara en el personaje
       this.camera.follow(this.player);
 
-	},
+  },
 
-	update: function () {
+  update: function () {
+    if (this.relocate === true){
+        this.player.x = 0
+        this.player.y = 0
+        this.relocate = false
+      }
 
-		//	Honestly, just about anything could go here. It's YOUR game after all. Eat your heart out!
-		//Colisiones
+    //  Honestly, just about anything could go here. It's YOUR game after all. Eat your heart out!
+    //Colisiones
       this.game.physics.arcade.collide(this.rats, this.layer);
       this.game.physics.arcade.collide(this.boars, this.layer);
       this.game.physics.arcade.collide(this.crowns, this.layer);
 
       this.game.physics.arcade.collide(this.player, this.layer);
+      this.game.physics.arcade.collide(this.boss, this.layer);
+      this.game.physics.arcade.collide(this.bossWaves, this.layer);
 
       if (this.invincibility === false)
       {
-      this.game.physics.arcade.overlap(this.player, this.rats,
+      this.game.physics.arcade.overlap(this.player, this.boss,
         function (player, enemy) {
                 BasicGame.health -= 1
                 this.invincibility = true
@@ -174,6 +191,20 @@ BasicGame.game.prototype = {
                 this.invincibility = true
                 this.invTimer = this.game.time.now + 1500
           }, null, this)
+      this.game.physics.arcade.overlap(this.player, this.bossBullets,
+          function (player, bullet) {
+                bullet.kill()
+                BasicGame.health -= 1
+                this.invincibility = true
+                this.invTimer = this.game.time.now + 1500
+          }, null, this)
+      this.game.physics.arcade.overlap(this.player, this.bossWaves,
+          function (player, wave) {
+                wave.kill()
+                BasicGame.health -= 1
+                this.invincibility = true
+                this.invTimer = this.game.time.now + 1500
+          }, null, this)
       }
       else
       {
@@ -184,6 +215,7 @@ BasicGame.game.prototype = {
       }
 
       this.healthTxt.setText ('Health: ' + BasicGame.health)
+      this.healthBossTxt.setText ('Boss health: ' + BasicGame.healthBoss)
 
       if(BasicGame.health <= 0)
       {
@@ -196,7 +228,7 @@ BasicGame.game.prototype = {
       this.specialAttack.y = this.player.y - 20
 
       //Movimiento personaje
-      if (this.input.keyboard.isDown(Phaser.Keyboard.A))
+       if (this.input.keyboard.isDown(Phaser.Keyboard.A))
       {
         this.player.body.setSize(103,145,0,0)
         this.player.body.velocity.x = -BasicGame.playerVel
@@ -280,9 +312,9 @@ BasicGame.game.prototype = {
 
         if (this.player.animations.currentAnim._frameIndex >= 0)
         {
-          this.physics.arcade.overlap(this.weapon, this.rats, 
+          this.physics.arcade.overlap(this.weapon, this.boss, 
           function (player, enemy) {
-                enemy.kill();
+                BasicGame.healthBoss -= 1;
           }, null, this);
 
           this.physics.arcade.overlap(this.weapon, this.boars, 
@@ -326,6 +358,11 @@ BasicGame.game.prototype = {
 
       if (this.input.keyboard.isDown(Phaser.Keyboard.L) && this.specialAttackTimer < this.game.time.now)
       {
+          this.physics.arcade.overlap(this.specialAttack, this.boss, 
+          function (player, enemy) {
+                BasicGame.healthBoss -= 1;
+          }, null, this);
+
           this.physics.arcade.overlap(this.specialAttack, this.boars, 
           function (player, enemy) {
                 enemy.kill();
@@ -413,136 +450,58 @@ BasicGame.game.prototype = {
 
 
       //Movimiento enemigos (Ver funcion)
-      this.movement(this.boar, 2950, 3750, -200, true, 250, false)
-      this.movement(this.crown, 1500, 2500, -150, false, 250, true, 450, 650)
-      this.movement(this.crown1, 2, 1200, -150, false, 250, true, 1000, 1200)
+
+      if (BasicGame.healthBoss === 0){
+        this.game.state.start('gameCity');
+      }
+
       
+    this.bossBullet = this.bossBullets.getFirstExists(false);
 
-      if (this.player.x >= 3750){
-        this.music.pause()
-        this.game.state.start('gameBoss1');
-      }
+    if (this.bossBullet && this.firingTimer1 < this.game.time.now)
+    {
+        
+        this.bossBullet.reset(this.boss.body.x+50, this.boss.body.y+50);
 
-      /*if (this.input.keyboard.isDown(Phaser.Keyboard.K))
-      {
+        this.game.physics.arcade.moveToObject(this.bossBullet,this.player,250);
+        this.firingTimer1 = this.game.time.now + 3000;
+    }
 
-        this.checkATT = 'bleh'
+    if (this.bossBullet && this.firingTimer2 < this.game.time.now)
+    {
+        
+        this.bossBullet.reset(this.boss.body.x+50, this.boss.body.y+50);
 
-      }
-      else if (this.checkATT === 'bleh')
-      {
-        if (this.facingATT !== 'left')
-        {
-            this.player.animations.play('attackR');
-            this.facingATT = 'right'
-            this.checkATT = 'hue'
-        } else if (this.facingATT !== 'right')
-        {
-            this.player.animations.play('attackL');
-            this.facingATT = 'left'
-            this.checkATT = 'hue'
+        this.game.physics.arcade.moveToObject(this.bossBullet,this.player,250);
+        this.firingTimer2 = this.game.time.now + 4000;
+    }
+
+    if (this.bossBullet && this.firingTimer3 < this.game.time.now)
+    {
+        
+        this.bossBullet.reset(this.boss.body.x+50, this.boss.body.y+50);
+
+        this.game.physics.arcade.moveToObject(this.bossBullet,this.player,250);
+        this.firingTimer3 = this.game.time.now + 5000;
+    }
+
+    this.bossWave = this.bossWaves.getFirstExists(false);
+
+    if (this.bossWave && this.waveTimer < this.game.time.now)
+    {
+        this.bossWave.reset(this.boss.body.x+50, this.boss.body.y+125);
+        if(this.player.x > this.boss.x){
+          this.bossWave.body.velocity.x = 300;
+        } else{
+          this.bossWave.body.velocity.x = -300;
         }
+        this.waveTimer = this.game.time.now + 3000;
+    }
 
-        if (this.player.animations.currentAnim._frameIndex >= 4)
-        {
-          this.physics.arcade.overlap(this.weapon, this.rats, 
-          function (player, enemy) {
-                enemy.kill();
-          }, null, this);
+    this.movement (this.boss,400,1000,-150)
 
-          this.physics.arcade.overlap(this.weapon, this.boars, 
-          function (player, enemy) {
-                enemy.kill();
-          }, null, this);
-
-          this.physics.arcade.overlap(this.weapon, this.crowns, 
-          function (player, enemy) {
-                enemy.kill();
-          }, null, this);
-        }
-      }
-      else
-      {
-        if (this.player.animations.currentAnim.isFinished === true)
-        {
-            this.player.animations.stop('attackL');
-            this.player.animations.stop('attackR');
-
-            if (this.facingATT === 'left')
-            {
-                this.player.body.setSize(90,145,0,0)
-                this.player.frame = 11;
-                this.facingATT = 'left'
-            }
-            else
-            {
-                this.player.body.setSize(90,145,0,0)
-                this.player.frame = 0;
-                this.facingATT = 'right'
-            }
-        }
-      }*/
-
-
-
-    /*if (this.input.keyboard.isDown(Phaser.Keyboard.K))
-      {
-        if (this.facingATT !== 'left')
-        {
-            this.player.animations.play('attackR');
-            this.facingATT = 'right'
-            this.checkATT = 'bleh'
-        } else if (this.facingATT !== 'right')
-        {
-            this.player.animations.play('attackL');
-            this.facingATT = 'left'
-            this.checkATT = 'bleh'
-        }
-
-        if (this.player.animations.currentAnim._frameIndex >= 4)
-        {
-          this.physics.arcade.overlap(this.weapon, this.rats, 
-          function (player, enemy) {
-                enemy.kill();
-          }, null, this);
-
-          this.physics.arcade.overlap(this.weapon, this.boars, 
-          function (player, enemy) {
-                enemy.kill();
-          }, null, this);
-
-          this.physics.arcade.overlap(this.weapon, this.crowns, 
-          function (player, enemy) {
-                enemy.kill();
-          }, null, this);
-        }
-      }
-      else
-      {
-        if (this.checkATT !== 'idle')
-        {
-            this.player.animations.stop('attackL');
-            this.player.animations.stop('attackR');
-
-            if (this.facingATT === 'left')
-            {
-                this.player.body.setSize(90,145,0,0)
-                this.player.frame = 11;
-                this.facingATT = 'left'
-            }
-            else
-            {
-                this.player.body.setSize(90,145,0,0)
-                this.player.frame = 0;
-                this.facingATT = 'right'
-            }
-
-            this.checkATT = 'idle';
-        }
-      }*/
-
-	},
-	movement: function (enemy, fromx, tox, vel, charge, distaceBW, flycharge, fromy, toy) {
+  },
+  movement: function (enemy, fromx, tox, vel, charge, distaceBW, flycharge, fromy, toy) {
       if (enemy.body.x <= fromx){
           enemy.body.velocity.x = (vel * -1)
           if (flycharge === true)
@@ -598,8 +557,6 @@ BasicGame.game.prototype = {
     },
 
     render: function () {
-      
-      this.game.debug.body(this.crown);
       this.game.debug.body(this.player);
       this.game.debug.body(this.weapon);
     },

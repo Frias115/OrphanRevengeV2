@@ -19,7 +19,7 @@ BasicGame.menu.prototype = {
       this.menuBg = this.game.add.tileSprite(0, 0, 1024, 768, 'menuBg');
       this.menuBg.fixedToCamera = true;
 
-      this.startButton = this.add.button(200, 370, 'startButton', function(){BasicGame.health = 3; this.state.start('game');;}, this);
+      this.startButton = this.add.button(200, 370, 'startButton', function(){BasicGame.health = 5 ;BasicGame.healthBoss = 3; this.state.start('game');}, this);
     
       this.optionsButton = this.add.button(200, 470, 'optionsButton', function(){this.game.state.start('options');}, this);
 
