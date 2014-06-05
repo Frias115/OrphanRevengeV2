@@ -30,7 +30,6 @@ BasicGame.gameCity.prototype = {
       this.bg = this.game.add.tileSprite(0, 0, 1024, 768, 'background');
       this.bg.fixedToCamera = true;
       
-
       //Carga de mapa
       this.map = this.game.add.tilemap('map2');
       this.map.addTilesetImage('groundCity');
@@ -39,12 +38,8 @@ BasicGame.gameCity.prototype = {
       this.layer = this.map.createLayer('Tile Layer 1');
       this.layer.resizeWorld();
 
-      //Musica de fondo
-      this.music = this.add.audio('bgMusic')
-      this.music.play('',0,0.2,true)
-
       //Creacion de jugador
-      this.player = this.add.sprite(0, 0, 'player');//100,500
+      this.player = this.add.sprite(0, 0, 'player');
       this.player.anchor.setTo(0.5, 0.5);
 
       //Creacion de Enemigos
@@ -52,7 +47,6 @@ BasicGame.gameCity.prototype = {
       this.rats.enableBody = true;
       this.rats.physicsBodyType = Phaser.Physics.ARCADE;
       this.rats.setAll('body.collideWorldBounds', true);
-
 
 
       this.boars = this.add.group();
@@ -82,14 +76,12 @@ BasicGame.gameCity.prototype = {
       this.spiders.physicsBodyType = Phaser.Physics.ARCADE;
       this.spiders.setAll('body.collideWorldBounds', true);
 
-
-
-      //Creacion de la "caja" del arma, ataque principal
+      //Creacion de la "caja" del arma, ataque principal y especial
       this.weapon = this.add.sprite(this.player.x+35,this.player.y-20,'')
       this.specialAttack = this.add.sprite(this.player.x+35,this.player.y+20,'')
       
       //Activa las fisicas en objetos
-      this.game.physics.enable([this.rats,this.boars,this.crowns,this.player,this.weapon,this.specialAttack,this.boss,this.bossBullets,this.bossWaves], Phaser.Physics.ARCADE);
+      this.game.physics.enable([this.rats,this.boars,this.crowns,this.player,this.weapon,this.specialAttack], Phaser.Physics.ARCADE);
 
       //Caracteristicas enemigos
       this.rats.setAll('body.gravity.y', 300);
@@ -120,7 +112,7 @@ BasicGame.gameCity.prototype = {
       this.player.animations.add('attackR', [30,31,32,33,34], 10)
       this.player.animations.add('attackL', [39,38,37,36,35], 10)
 
-      //Caracteristicas arma, ataque principal
+      //Caracteristicas arma, ataque principal y especial
       this.weapon.body.collideWorldBounds = true;
       this.weapon.body.drag.setTo(600, 0);
       this.weapon.body.setSize(50,90,0,0)
@@ -129,6 +121,7 @@ BasicGame.gameCity.prototype = {
       this.specialAttack.body.drag.setTo(600, 0);
       this.specialAttack.body.setSize(100,45,0,0)
 
+      //Textos de vida y recarga ataque especial
       this.healthTxt = this.add.bitmapText(20, 20, 'minecraftia', 'Health: ' );
       this.healthTxt.fixedToCamera = true
 
@@ -145,19 +138,20 @@ BasicGame.gameCity.prototype = {
     },
 
     update: function () {
+      //Al pasar de un mapa a otro el punto (0,0) cambia de posicion por lo que hay que recolocar al personaje
       if (this.relocate === true){
         this.player.x = -4000
         this.player.y = 500
         this.relocate = false
       }
 
-      //Colisiones
+    //Colisiones
       this.game.physics.arcade.collide(this.rats, this.layer);
       this.game.physics.arcade.collide(this.boars, this.layer);
       this.game.physics.arcade.collide(this.crowns, this.layer);
 
       this.game.physics.arcade.collide(this.player, this.layer);
-
+      //Cuando el personaje pierde una vida tiene 1.5 segundos de inmunidad 
       if (this.invincibility === false)
       {
       this.game.physics.arcade.overlap(this.player, this.rats,
@@ -187,19 +181,22 @@ BasicGame.gameCity.prototype = {
         }
       }
 
+    //Vida del personaje
       this.healthTxt.setText ('Health: ' + BasicGame.health)
 
-      if(BasicGame.health <= 0)
+    //Muerte del personaje o vuelta al menu
+      if(BasicGame.health <= 0 || this.input.keyboard.isDown(Phaser.Keyboard.P) || this.player.y >= 1550)
       {
-       this.music.pause();
+       BasicGame.gameMusic.pause();
+       BasicGame.musicPlaying = false
        this.game.state.start('menu');
       }
 
-      //Movimiento arma
+    //Movimiento arma
       this.weapon.y = this.player.y - 40
       this.specialAttack.y = this.player.y - 20
 
-      //Movimiento personaje
+    //Movimiento personaje
        if (this.input.keyboard.isDown(Phaser.Keyboard.A))
       {
         this.player.body.setSize(103,145,0,0)
@@ -260,8 +257,8 @@ BasicGame.gameCity.prototype = {
             this.facing = 'idle';
         }
       }
-      console.log(this.player.animations.currentAnim._frameIndex)
-      //Ataque principal
+
+    //Ataque principal
       if (this.input.keyboard.isDown(Phaser.Keyboard.K))
       {
     
@@ -322,21 +319,48 @@ BasicGame.gameCity.prototype = {
         }
       }
 
-      //Salto y doble salto
-        // Set a variable that is true when the player is touching the ground
+    //Ataque especial
+      if (this.specialAttackTimer <= this.game.time.now){
+      this.specialAttackTxt.setText ('Special Attack: UP!')
+      } else{
+      this.specialAttackTxt.setText ('Special Attack: ' + (this.specialAttackTimer - this.game.time.now)) 
+      }
+
+      if (this.input.keyboard.isDown(Phaser.Keyboard.L) && this.specialAttackTimer < this.game.time.now)
+      {
+          this.physics.arcade.overlap(this.specialAttack, this.boss, 
+          function (player, enemy) {
+                BasicGame.healthBoss -= 1;
+          }, null, this);
+
+          this.physics.arcade.overlap(this.specialAttack, this.boars, 
+          function (player, enemy) {
+                enemy.kill();
+          }, null, this);
+
+          this.physics.arcade.overlap(this.specialAttack, this.crowns, 
+          function (player, enemy) {
+                enemy.kill();
+          }, null, this);
+
+          this.specialAttackTimer = this.game.time.now + 2500;
+
+      }
+
+    //Salto y doble salto
       if (this.player.body.onFloor()) this.canDoubleJump = true;
 
       if (this.input.keyboard.justPressed(Phaser.Keyboard.W, 1)) {
-        // Allow the player to adjust his jump height by holding the jump button
+        
         if (this.canDoubleJump) this.canVariableJump = true;
         
         if (this.canDoubleJump || this.player.body.onFloor()) {
-            // Jump when the player is touching the ground or they can double jump
+            
             this.player.body.velocity.y = -350;
             this.checkJ = 'jumping'
 
 
-            // Disable ability to double jump if the player is jumping in the air
+           
             if (!this.player.body.onFloor()) this.canDoubleJump = false;
         }
       }
@@ -388,142 +412,23 @@ BasicGame.gameCity.prototype = {
       }
 
 
-      // Don't allow variable jump height after the jump button is released
       if (!this.input.keyboard.isDown(Phaser.Keyboard.W)) {
         this.canVariableJump = false;
       }
 
+    //Siguiente nivel
       if (this.player.x >= 3750){
         BasicGame.healthBoss = 3
         this.game.state.start('gameBoss2');
       }
 
 
-      //Movimiento enemigos (Ver funcion)
+    //Movimiento enemigos (Ver funcion)
       this.movement(this.boar, 2500, 3500, -200, true, 250, false)
       this.movement(this.boar1, 800, 1500, -200, true, 250, false)
       this.movement(this.crown, 2500, 3500, -150, false, 250, true, 350, 650)
       this.movement(this.crown1, 1500, 2200, -150, false, 250, true, 600, 800)      
 	  
-
-
-	  /*if (this.input.keyboard.isDown(Phaser.Keyboard.K))
-      {
-
-        this.checkATT = 'bleh'
-
-      }
-      else if (this.checkATT === 'bleh')
-      {
-        if (this.facingATT !== 'left')
-        {
-            this.player.animations.play('attackR');
-            this.facingATT = 'right'
-            this.checkATT = 'hue'
-        } else if (this.facingATT !== 'right')
-        {
-            this.player.animations.play('attackL');
-            this.facingATT = 'left'
-            this.checkATT = 'hue'
-        }
-
-        if (this.player.animations.currentAnim._frameIndex >= 4)
-        {
-          this.physics.arcade.overlap(this.weapon, this.rats, 
-          function (player, enemy) {
-                enemy.kill();
-          }, null, this);
-
-          this.physics.arcade.overlap(this.weapon, this.boars, 
-          function (player, enemy) {
-                enemy.kill();
-          }, null, this);
-
-          this.physics.arcade.overlap(this.weapon, this.crowns, 
-          function (player, enemy) {
-                enemy.kill();
-          }, null, this);
-        }
-      }
-      else
-      {
-        if (this.player.animations.currentAnim.isFinished === true)
-        {
-            this.player.animations.stop('attackL');
-            this.player.animations.stop('attackR');
-
-            if (this.facingATT === 'left')
-            {
-                this.player.body.setSize(90,145,0,0)
-                this.player.frame = 11;
-                this.facingATT = 'left'
-            }
-            else
-            {
-                this.player.body.setSize(90,145,0,0)
-                this.player.frame = 0;
-                this.facingATT = 'right'
-            }
-        }
-      }*/
-
-
-
-    /*if (this.input.keyboard.isDown(Phaser.Keyboard.K))
-      {
-        if (this.facingATT !== 'left')
-        {
-            this.player.animations.play('attackR');
-            this.facingATT = 'right'
-            this.checkATT = 'bleh'
-        } else if (this.facingATT !== 'right')
-        {
-            this.player.animations.play('attackL');
-            this.facingATT = 'left'
-            this.checkATT = 'bleh'
-        }
-
-        if (this.player.animations.currentAnim._frameIndex >= 4)
-        {
-          this.physics.arcade.overlap(this.weapon, this.rats, 
-          function (player, enemy) {
-                enemy.kill();
-          }, null, this);
-
-          this.physics.arcade.overlap(this.weapon, this.boars, 
-          function (player, enemy) {
-                enemy.kill();
-          }, null, this);
-
-          this.physics.arcade.overlap(this.weapon, this.crowns, 
-          function (player, enemy) {
-                enemy.kill();
-          }, null, this);
-        }
-      }
-      else
-      {
-        if (this.checkATT !== 'idle')
-        {
-            this.player.animations.stop('attackL');
-            this.player.animations.stop('attackR');
-
-            if (this.facingATT === 'left')
-            {
-                this.player.body.setSize(90,145,0,0)
-                this.player.frame = 11;
-                this.facingATT = 'left'
-            }
-            else
-            {
-                this.player.body.setSize(90,145,0,0)
-                this.player.frame = 0;
-                this.facingATT = 'right'
-            }
-
-            this.checkATT = 'idle';
-        }
-      }*/
 
 	 },
 
@@ -584,9 +489,8 @@ BasicGame.gameCity.prototype = {
 
     render: function () {
       
-      this.game.debug.body(this.crown);
-      this.game.debug.body(this.player);
       this.game.debug.body(this.weapon);
+      this.game.debug.body(this.specialAttack)
     },
 
     moveToObjectHM: function (displayObject, destination, speed, maxTime) {
@@ -595,7 +499,6 @@ BasicGame.gameCity.prototype = {
 
         if (maxTime > 0)
         {
-            //  We know how many pixels we need to move, but how fast?
             speed = this.physics.arcade.distanceBetween(displayObject, destination) / (maxTime / 1000);
         }
 

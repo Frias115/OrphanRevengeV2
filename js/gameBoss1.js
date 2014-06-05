@@ -37,12 +37,8 @@ BasicGame.gameBoss1.prototype = {
       this.layer = this.map.createLayer('Tile Layer 1');
       this.layer.resizeWorld();
 
-      //Musica de fondo
-      //this.music = this.add.audio('bgMusic')
-      //this.music.play('',0,0.2,true)
-
       //Creacion de jugador
-      this.player = this.add.sprite(100, 500, 'player');//100,500
+      this.player = this.add.sprite(100, 500, 'player');
       this.player.anchor.setTo(0.5, 0.5);
 
       //Creacion de Enemigos
@@ -73,7 +69,7 @@ BasicGame.gameBoss1.prototype = {
       this.boss = this.add.sprite(-4000,500,'enemy');
       this.boss.anchor.setTo(0.5, 0.5);
 
-
+     //Proyectiles del jefe
      this.bossBullets = this.game.add.group();
      this.bossBullets.createMultiple(10, 'bulletHunter');
      this.bossBullets.setAll('anchor.x', 0.5);
@@ -81,6 +77,7 @@ BasicGame.gameBoss1.prototype = {
      this.bossBullets.setAll('outOfBoundsKill', true);
      this.bossBullets.setAll('checkWorldBounds', true);
 
+     //Ataques por el suelo del jefe
      this.bossWaves = this.game.add.group();
      this.bossWaves.createMultiple(4, 'wave');
      this.bossWaves.setAll('anchor.x', 0.5);
@@ -89,7 +86,7 @@ BasicGame.gameBoss1.prototype = {
      this.bossWaves.setAll('checkWorldBounds', true);
 
 
-      //Creacion de la "caja" del arma, ataque principal
+      //Creacion de la "caja" del arma, ataque principaly especial
       this.weapon = this.add.sprite(this.player.x+35,this.player.y-20,'')
       this.specialAttack = this.add.sprite(this.player.x+35,this.player.y+20,'')
       
@@ -97,16 +94,7 @@ BasicGame.gameBoss1.prototype = {
       this.game.physics.enable([this.rats,this.boars,this.crowns,this.player,this.weapon,this.specialAttack,this.boss,this.bossBullets,this.bossWaves], Phaser.Physics.ARCADE);
 
       //Caracteristicas enemigos
-      this.rats.setAll('body.gravity.y', 300);
-      this.rats.setAll('body.velocity.x', -150)
-
-      this.boars.setAll('body.gravity.y', 300);
-      this.boars.setAll('body.velocity.x', -150)
-
-      this.crowns.setAll('body.velocity.x', -150)
-
       this.bossWaves.setAll('body.gravity.y', 300);
-
 
       this.boss.body.gravity.y = 300;
       this.boss.body.collideWorldBounds = true;
@@ -125,7 +113,7 @@ BasicGame.gameBoss1.prototype = {
       this.player.animations.add('attackR', [30,31,32,33,34], 10)
       this.player.animations.add('attackL', [39,38,37,36,35], 10)
 
-      //Caracteristicas arma, ataque principal
+      //Caracteristicas arma, ataque principal y especial
       this.weapon.body.collideWorldBounds = true;
       this.weapon.body.drag.setTo(600, 0);
       this.weapon.body.setSize(50,90,0,0)
@@ -134,7 +122,7 @@ BasicGame.gameBoss1.prototype = {
       this.specialAttack.body.drag.setTo(600, 0);
       this.specialAttack.body.setSize(100,45,0,0)
 
-
+      //Textos de vida del personaje y del jefe, y recarga ataque especial
       this.healthTxt = this.add.bitmapText(20, 20, 'minecraftia', '' );
       this.healthTxt.fixedToCamera = true
 
@@ -154,6 +142,7 @@ BasicGame.gameBoss1.prototype = {
   },
 
   update: function () {
+    //Al pasar de un mapa a otro el punto (0,0) cambia de posicion por lo que hay que recolocar al personaje y al jefe
     if (this.relocate === true){
         this.player.x = -4000
         this.player.y = 0
@@ -162,7 +151,6 @@ BasicGame.gameBoss1.prototype = {
         this.relocate = false
       }
 
-    //  Honestly, just about anything could go here. It's YOUR game after all. Eat your heart out!
     //Colisiones
       this.game.physics.arcade.collide(this.rats, this.layer);
       this.game.physics.arcade.collide(this.boars, this.layer);
@@ -172,6 +160,7 @@ BasicGame.gameBoss1.prototype = {
       this.game.physics.arcade.collide(this.boss, this.layer);
       this.game.physics.arcade.collide(this.bossWaves, this.layer);
 
+      //Cuando el personaje pierde una vida tiene 1.5 segundos de inmunidad 
       if (this.invincibility === false)
       {
       this.game.physics.arcade.overlap(this.player, this.boss,
@@ -215,20 +204,23 @@ BasicGame.gameBoss1.prototype = {
         }
       }
 
+    //Vida del personaje y del jefe
       this.healthTxt.setText ('Health: ' + BasicGame.health)
       this.healthBossTxt.setText ('Boss health: ' + BasicGame.healthBoss)
 
-      if(BasicGame.health <= 0)
+    //Muerte del personaje o vuelta al menu
+      if(BasicGame.health <= 0 || this.input.keyboard.isDown(Phaser.Keyboard.P))
       {
-       this.music.pause();
+       BasicGame.gameMusic.pause()
+       BasicGame.musicPlaying = false
        this.game.state.start('menu');
       }
 
-      //Movimiento arma
+    //Movimiento arma
       this.weapon.y = this.player.y - 40
       this.specialAttack.y = this.player.y - 20
 
-      //Movimiento personaje
+    //Movimiento personaje
       if (this.input.keyboard.isDown(Phaser.Keyboard.A))
       {
         this.player.body.setSize(103,145,0,0)
@@ -351,6 +343,7 @@ BasicGame.gameBoss1.prototype = {
         }
       }
 
+    //Ataque especial
       if (this.specialAttackTimer <= this.game.time.now){
       this.specialAttackTxt.setText ('Special Attack: UP!')
       } else{
@@ -381,20 +374,14 @@ BasicGame.gameBoss1.prototype = {
 
 
       //Salto y doble salto
-        // Set a variable that is true when the player is touching the ground
+        
       if (this.player.body.onFloor()) this.canDoubleJump = true;
 
       if (this.input.keyboard.justPressed(Phaser.Keyboard.W, 1)) {
-        // Allow the player to adjust his jump height by holding the jump button
         if (this.canDoubleJump) this.canVariableJump = true;
-        
         if (this.canDoubleJump || this.player.body.onFloor()) {
-            // Jump when the player is touching the ground or they can double jump
             this.player.body.velocity.y = -350;
             this.checkJ = 'jumping'
-
-
-            // Disable ability to double jump if the player is jumping in the air
             if (!this.player.body.onFloor()) this.canDoubleJump = false;
         }
       }
@@ -444,21 +431,16 @@ BasicGame.gameBoss1.prototype = {
             this.checkJ = 'idle';
         }
       }
-
-
-      // Don't allow variable jump height after the jump button is released
       if (!this.input.keyboard.isDown(Phaser.Keyboard.W)) {
         this.canVariableJump = false;
       }
 
-
-      //Movimiento enemigos (Ver funcion)
-
+    //Muerte del jefe, siguiente nivel
       if (BasicGame.healthBoss === 0){
         this.game.state.start('gameCity');
       }
 
-      
+    //Proyectiles y "ondas" que te lanza el jefe
     this.bossBullet = this.bossBullets.getFirstExists(false);
 
     if (this.bossBullet && this.firingTimer1 < this.game.time.now)
@@ -535,7 +517,6 @@ BasicGame.gameBoss1.prototype = {
     },
 
     render: function () {
-      this.game.debug.body(this.player);
       this.game.debug.body(this.weapon);
       this.game.debug.body(this.specialAttack)
     },
